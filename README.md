@@ -15,4 +15,4 @@ The `cdk.json` file tells the CDK Toolkit how to execute your app.
 
 # Key Concepts
 * Enforce tags usage to CloudFormation template: ensure that your users create and attach resource tags to the AWS resources they plan to deploy / are using
-
+* Validate tags values: verify whether the tag values your users define are consistent

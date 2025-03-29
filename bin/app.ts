@@ -14,5 +14,11 @@ const lambdaFunction = new cdk.aws_lambda.Function(testStack, 'MyFunction', {
   code: cdk.aws_lambda.Code.fromInline('exports.handler2 = function(event, context) { console.log("Hello World"); }'),
   handler: 'index.handler2'
 });
+/**  
+ * Replace the tag in the comment lines to test the tag policies.
+ * Check the compliance status of the tag policies in the AWS Resource Groups console.
+ */ 
 cdk.Tags.of(testStack).add('Product', 'web');
 cdk.Tags.of(testStack).add('Environment', 'develop');
+// cdk.Tags.of(testStack).add('Product', 'webTEST');
+// cdk.Tags.of(testStack).add('Environment', 'developTEST');
