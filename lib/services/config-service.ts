@@ -1,19 +1,32 @@
-import { RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
-import { CfnConfigurationRecorder, CfnDeliveryChannel, ManagedRule, ManagedRuleIdentifiers } from 'aws-cdk-lib/aws-config';
-import { Role, ManagedPolicy, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
-import { BlockPublicAccess, Bucket, BucketEncryption } from 'aws-cdk-lib/aws-s3';
+import { PhysicalName, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
+import { CfnConfigurationAggregator, CfnConfigurationRecorder, CfnDeliveryChannel } from 'aws-cdk-lib/aws-config';
+import { Role, ManagedPolicy, ServicePrincipal, Effect, AnyPrincipal, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { BlockPublicAccess, Bucket, BucketEncryption, BucketPolicy } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
-import { AwsEnv, ProductName } from '../../bin/configs';
+import { AwsEnv, OrganizationId, ProductName } from '../../bin/configs';
 
 export class ConfigService extends Construct {
   constructor(scope: Construct, id: string) {
     super(scope, id);
 
-    const configHistoryAndSnapShots = new Bucket(this, 'HistoryAndSnapShots', {
-      removalPolicy: RemovalPolicy.DESTROY,
-      encryption: BucketEncryption.S3_MANAGED,
-      blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
-    });
+    // const centralLogBucket = new Bucket(this, 'ConfigCentralLogs', {
+    //   bucketName: `aws-config-central-logs-${Stack.of(this).account}`,
+    //   removalPolicy: RemovalPolicy.DESTROY,
+    //   autoDeleteObjects: true,
+    //   encryption: BucketEncryption.S3_MANAGED,
+    //   blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
+    // });
+    // centralLogBucket.addToResourcePolicy(new PolicyStatement({
+    //   effect: Effect.ALLOW,
+    //   principals: [new AnyPrincipal()],
+    //   actions: ['s3:GetObject', 's3:PutObject'],
+    //   resources: [`${centralLogBucket.bucketArn}/AWSLogs/*`],
+    //   conditions: {
+    //     StringEquals: {
+    //       "aws:PrincipalOrgID": OrganizationId
+    //     }
+    //   }
+    // }));
 
     // Enable AWS Config - Develop account
     const awsConfigStack_Develop = new AwsConfigStack(this, 'EnableAwsConfigDevelopAccount', {
@@ -21,14 +34,40 @@ export class ConfigService extends Construct {
       tags: {
         Product: ProductName,
         Environment: 'develop',
-      }
+      },
+      // configHistoryAndSnapShotsBucketName: centralLogBucket.bucketName,
     });
+
+    // Enable AWS Config - Product account
     const awsConfigStack_Product = new AwsConfigStack(this, 'EnableAwsConfigProductAccount', {
       env: AwsEnv.product,
       tags: {
         Product: ProductName,
         Environment: 'product',
       }
+    });
+
+    // Enable AWS Config - Root account
+    const awsConfigStack_Root = new AwsConfigStack(this, 'EnableAwsConfigRootAccount', {
+      env: AwsEnv.root,
+      tags: {
+        Product: ProductName,
+        Environment: 'root',
+      },
+    });
+
+    // Aggregate AWS Config in the Root account
+    const _ConfigRoleForOrganizationAggregator = new Role(this, 'AWSConfigRoleForOrganizationAggregator', {
+      assumedBy: new ServicePrincipal('config.amazonaws.com'),
+      managedPolicies: [
+        ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSConfigRoleForOrganizations'),
+      ],
+    });
+    const _OrganizationAggregator = new CfnConfigurationAggregator(awsConfigStack_Root, 'OrganizationAggregator', {
+      organizationAggregationSource: {
+        roleArn: _ConfigRoleForOrganizationAggregator.roleArn,
+        allAwsRegions: true,
+      },
     });
   }
 }
@@ -38,21 +77,24 @@ interface AwsConfigStackProps extends StackProps {
 }
 class AwsConfigStack extends Stack {
 
-  private _configHistoryAndSnapShotsBucket: Bucket;  
+  private _logsBucket?: Bucket;
   private _configHistoryAndSnapShotsBucketName: string;
   public get configHistoryAndSnapShotsBucketName(): string {
     return this._configHistoryAndSnapShotsBucketName;
   }
-  public set configHistoryAndSnapShotsBucketName(v: string | undefined) {
+  set configHistoryAndSnapShotsBucketName(v: string | undefined) {
     if (v) {
+      this._logsBucket = undefined;
       this._configHistoryAndSnapShotsBucketName = v;
     } else {
-      this._configHistoryAndSnapShotsBucket = new Bucket(this, 'HistoryAndSnapShots', {
+      this._logsBucket = new Bucket(this, 'ConfigLogs', {
+        bucketName: `aws-config-logs-${Stack.of(this).account}`,
         removalPolicy: RemovalPolicy.DESTROY,
+        autoDeleteObjects: true,
         encryption: BucketEncryption.S3_MANAGED,
         blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
       });
-      this._configHistoryAndSnapShotsBucketName = this._configHistoryAndSnapShotsBucket.bucketName;
+      this._configHistoryAndSnapShotsBucketName = this._logsBucket.bucketName;
     }
   }
 
@@ -69,7 +111,7 @@ class AwsConfigStack extends Stack {
         ManagedPolicy.fromAwsManagedPolicyName('service-role/AWS_ConfigRole'),
       ]
     });
-    this._configHistoryAndSnapShotsBucket?.grantReadWrite(serviceRole);
+    this._logsBucket?.grantReadWrite(serviceRole);
 
     // Create the Configuration Recorder
     const recorder = new CfnConfigurationRecorder(this, 'Recorder', {

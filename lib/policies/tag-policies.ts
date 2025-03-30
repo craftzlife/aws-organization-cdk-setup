@@ -32,6 +32,7 @@ export class TagPolicies extends Construct {
                 "mobile",
                 "api",
                 "tooling",
+                "AWSOrganization",
               ]
             },
             "enforced_for": {
@@ -342,6 +343,8 @@ export class TagPolicies extends Construct {
             },
             "tag_value": {
               "@@assign": [
+                "root",
+                "tooling",
                 "develop",
                 "staging",
                 "product"
