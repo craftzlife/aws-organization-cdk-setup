@@ -4,7 +4,7 @@ import { AwsOrganizationStack } from '../lib/aws-organization-stack';
 import { AwsEnv } from './configs';
 
 const app = new cdk.App();
-const _AwsOrganizationStack = new AwsOrganizationStack(app, 'AwsOrganization', {
+const organizationStack = new AwsOrganizationStack(app, 'AwsOrganization', {
   env: AwsEnv.root,
 });
 

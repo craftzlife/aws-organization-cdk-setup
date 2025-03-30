@@ -15,10 +15,10 @@ export class AwsOrganizationStack extends cdk.Stack {
     super(scope, id, props);
 
     // Service Control Policies
-    const _ServiceControlPolicies = new ServiceControlPolicies(this, 'ServiceControlPolicies');
+    const serviceControlPolicies = new ServiceControlPolicies(this, 'ServiceControlPolicies');
     // Tag Policies
-    const _TagPolicies = new TagPolicies(this, 'TagPolicies');
+    const tagPolicies = new TagPolicies(this, 'TagPolicies');
     // Services
-    const _ConfigService = new ConfigService(this, 'ConfigService');
+    const configService = new ConfigService(this, 'ConfigService');
   }
 }
