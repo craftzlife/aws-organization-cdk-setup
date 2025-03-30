@@ -66,7 +66,7 @@ export class ConfigService extends Construct {
     });
 
     // Aggregate AWS Config in the Root account
-    const roleForOrganizationAggregator = new Role(this, 'AWSConfigRoleForOrganizationAggregator', {
+    const roleForOrganizationAggregator = new Role(awsConfigStack_Root, 'AWSConfigRoleForOrganizationAggregator', {
       assumedBy: new ServicePrincipal('config.amazonaws.com'),
       managedPolicies: [
         ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSConfigRoleForOrganizations'),
