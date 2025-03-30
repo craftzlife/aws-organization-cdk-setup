@@ -47,6 +47,15 @@ export class ConfigService extends Construct {
       }
     });
 
+    // Enable AWS Config - Tooling account
+    const awsConfigStack_Tooling = new AwsConfigStack(this, 'EnableAwsConfigToolingAccount', {
+      env: AwsEnv.tooling,
+      tags: {
+        Product: ProductName,
+        Environment: 'tooling',
+      },
+    });
+
     // Enable AWS Config - Root account
     const awsConfigStack_Root = new AwsConfigStack(this, 'EnableAwsConfigRootAccount', {
       env: AwsEnv.root,
