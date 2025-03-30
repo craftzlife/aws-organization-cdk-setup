@@ -30,7 +30,8 @@ export class TagPolicies extends Construct {
               "@@assign": [
                 "web",
                 "mobile",
-                "api"
+                "api",
+                "tooling",
               ]
             },
             "enforced_for": {

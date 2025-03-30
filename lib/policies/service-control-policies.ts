@@ -21,6 +21,7 @@ export class ServiceControlPolicies extends Construct {
       targetIds: Array.from(new Set([
         AwsEnv.tooling.account,
         AwsEnv.develop.account,
+        AwsEnv.product.account,
       ])),
       content: {
         "Version": "2012-10-17",

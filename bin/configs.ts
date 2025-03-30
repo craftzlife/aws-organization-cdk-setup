@@ -1,3 +1,4 @@
+export const ProductName = 'AwsOrganization';
 
 export const AwsEnv = {
     root: { account: '462599156704', region: 'ap-southeast-1' },
