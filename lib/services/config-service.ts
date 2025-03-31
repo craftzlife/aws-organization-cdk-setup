@@ -1,5 +1,5 @@
 import { PhysicalName, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
-import { CfnConfigurationAggregator, CfnConfigurationRecorder, CfnDeliveryChannel } from 'aws-cdk-lib/aws-config';
+import { CfnConfigurationAggregator, CfnConfigurationRecorder, CfnDeliveryChannel, CfnOrganizationConfigRule, ManagedRule, ManagedRuleIdentifiers } from 'aws-cdk-lib/aws-config';
 import { Role, ManagedPolicy, ServicePrincipal, Effect, AnyPrincipal, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { BlockPublicAccess, Bucket, BucketEncryption, BucketPolicy } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
@@ -78,6 +78,25 @@ export class ConfigService extends Construct {
         allAwsRegions: true,
       },
     });
+
+    // ✅ Managed Rule: AWS Config rule for required tags
+    // ①　Resource must have tag: Product
+    // ②　Resource must have tag: Environment
+    new CfnOrganizationConfigRule(this, 'OrgDefaultTagsRule', {
+      organizationConfigRuleName: 'Organization-DefaultTagsRule',
+      organizationManagedRuleMetadata: {
+        ruleIdentifier: ManagedRuleIdentifiers.REQUIRED_TAGS,
+        description: 'Required Tags Rule',
+        inputParameters: '{"tag1Key":"Product","tag2Key":"Environment"}',
+        // maximumExecutionFrequency: 'TwentyFour_Hours',
+      },
+      excludedAccounts: [
+        // AwsEnv.root.account,
+        // AwsEnv.tooling.account,
+        // AwsEnv.develop.account,
+        // AwsEnv.product.account,
+      ],
+    });
   }
 }
 interface AwsConfigStackProps extends StackProps {
@@ -135,7 +154,7 @@ class AwsConfigStack extends Stack {
     const deliveryChannel = new CfnDeliveryChannel(this, 'DeliveryChannel', {
       s3BucketName: this.configHistoryAndSnapShotsBucketName,
       configSnapshotDeliveryProperties: {
-        deliveryFrequency: 'One_Hour',
+        deliveryFrequency: 'Twelve_Hours',
       },
     });
   }
