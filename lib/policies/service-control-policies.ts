@@ -30,8 +30,8 @@ export class ServiceControlPolicies extends Construct {
             "Sid": "DenyCreationWithoutTagKeyProduct",
             "Effect": "Deny",
             "Action": [
-              'cloudformation:Create*',
-              'cloudformation:Update*',
+              'cloudformation:CreateStack',
+              'cloudformation:UpdateStack',
             ],
             "Resource": [
               // "*", NOTE: Using "*" will deny all resources, including some Serverless Transformation resources"
@@ -48,8 +48,8 @@ export class ServiceControlPolicies extends Construct {
             "Sid": "DenyCreationWithoutTagKeyEnvironment",
             "Effect": "Deny",
             "Action": [
-              'cloudformation:Create*',
-              'cloudformation:Update*',
+              'cloudformation:CreateStack',
+              'cloudformation:UpdateStack',
             ],
             "Resource":
               // "*", NOTE: Using "*" will deny all resources, including some Serverless Transformation resources"
