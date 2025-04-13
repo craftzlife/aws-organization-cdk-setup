@@ -33,7 +33,11 @@ export class ServiceControlPolicies extends Construct {
               'cloudformation:Create*',
               'cloudformation:Update*',
             ],
-            "Resource": "*",
+            "Resource": [
+              // "*", NOTE: Using "*" will deny all resources, including some Serverless Transformation resources"
+              // Use the following instead to deny only CloudFormation resources
+              "arn:aws:cloudformation:*:*:stack/*"
+            ],
             "Condition": {
               "Null": {
                 "aws:RequestTag/Product": "true"
@@ -47,7 +51,10 @@ export class ServiceControlPolicies extends Construct {
               'cloudformation:Create*',
               'cloudformation:Update*',
             ],
-            "Resource": "*",
+            "Resource":
+              // "*", NOTE: Using "*" will deny all resources, including some Serverless Transformation resources"
+              // Use the following instead to deny only CloudFormation resources
+              "arn:aws:cloudformation:*:*:stack/*",
             "Condition": {
               "Null": {
                 "aws:RequestTag/Environment": "true",
