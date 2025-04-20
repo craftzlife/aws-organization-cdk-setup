@@ -154,7 +154,7 @@ class AwsConfigStack extends Stack {
     const deliveryChannel = new CfnDeliveryChannel(this, 'DeliveryChannel', {
       s3BucketName: this.configHistoryAndSnapShotsBucketName,
       configSnapshotDeliveryProperties: {
-        deliveryFrequency: 'Twelve_Hours',
+        deliveryFrequency: 'TwentyFour_Hours',
       },
     });
   }
