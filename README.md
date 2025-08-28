@@ -1,11 +1,51 @@
-# Key Concepts
-* Enforce tags usage to CloudFormation template: ensure that your users create and attach resource tags to the AWS resources they plan to deploy / are using
-* Validate tags values: verify whether the tag values your users define are consistent
+# AWS Organization CDK Setup
 
-## Useful commands
-* `npm run build`   compile typescript to js
-* `npm run watch`   watch for changes and compile
-* `npm run test`    perform the jest unit tests
-* `npx cdk deploy`  deploy this stack to your default AWS account/region
-* `npx cdk diff`    compare deployed stack with current state
-* `npx cdk synth`   emits the synthesized CloudFormation template
+AWS CDK project for setting up AWS Organizations with governance policies and compliance monitoring.
+
+## Features
+
+- **Service Control Policies**: Centralized permission guardrails across AWS accounts
+- **Tag Policies**: Enforce consistent resource tagging standards
+- **AWS Config**: Monitor compliance and configuration changes
+
+## Prerequisites
+
+- AWS CLI configured with appropriate permissions
+- Node.js 18+ and npm
+- AWS CDK CLI: `npm install -g aws-cdk`
+
+## Quick Start
+
+```bash
+# Install dependencies
+npm install
+
+# Build the project
+npm run build
+
+# Deploy to AWS
+npx cdk deploy
+```
+
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `npm run build` | Compile TypeScript to JavaScript |
+| `npm run watch` | Watch for changes and compile |
+| `npm run test` | Run Jest unit tests |
+| `npx cdk deploy` | Deploy stack to AWS |
+| `npx cdk diff` | Compare deployed stack with current state |
+| `npx cdk synth` | Generate CloudFormation template |
+
+## Project Structure
+
+```
+lib/
+├── policies/
+│   ├── service-control-policies.ts
+│   └── tag-policies.ts
+├── services/
+│   └── config-service.ts
+└── aws-organization-stack.ts
+```
